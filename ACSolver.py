@@ -3,7 +3,7 @@ from AntColony import *
 
 EVAP_RATE = .1
 NUM_PER_GENERATION = 40
-GENERATION_BOUND = 50
+GENERATION_BOUND = 80
 
 
 def evaporate(phMatrix):
@@ -26,6 +26,8 @@ class ACSolver(object):
         for i, city in enumerate(cities):
             for j, city2 in enumerate(cities):
                 dist_matrix[i, j] = city.costTo(city2)
+                if dist_matrix[i, j] == 0.0:
+                    dist_matrix[i, j] = 0.1
 
         for i in range(len(cities)):
             pheromone_matrix[i, i] = 0
@@ -48,6 +50,7 @@ class ACSolver(object):
                 if bssf is None or bssf.cost > cost:
                     bssf = solution
                     lastEdited = currentGeneration
+                    print('updated bssf')
 
             for phMatrix in pheromones_to_register:
                 pheromone_matrix += phMatrix

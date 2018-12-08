@@ -4,7 +4,7 @@ import random
 from TSPClasses import *
 
 ALPHA = 1.5
-BETA = 2
+BETA = 2.0
 NUM_PHEROMONES = 50.0
 
 
@@ -13,8 +13,9 @@ def choose_index(probs):
     choice = random.uniform(0.0, total_prob)
     vals = [sum(probs[:i]) for i in range(1, len(probs) + 1)]
     for i in range(len(vals)):
-        if choice < vals[i]:
+        if choice <= vals[i]:
             return i
+    print('aah')
 
 
 class Ant(object):
