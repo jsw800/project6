@@ -15,7 +15,11 @@ class ACSolver(object):
         bssf = None;
         start_time = time.time()
         currrent_time = time.time()
-        while currrent_time - start_time < time_allowance :
+        generationBound = 10
+        currentGeneration = 0
+
+        while generationBound < currentGeneration and currrent_time - start_time < time_allowance :
+            antArray = []
             for i in range(antNum):
                 antArray.append(Ant(cities,cityMatrix))
 
@@ -32,8 +36,8 @@ class ACSolver(object):
                 elif bssf.cost > cost:
                     bssf = solution
             
+            currentGeneration++
             currrent_time = time.time()
-
         return bssf
 
 
