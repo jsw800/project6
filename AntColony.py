@@ -34,5 +34,7 @@ class Ant(object):
             cost = this_one.costTo(next_one)
             ratio = cost / total_cost
             pheromones_to_alloc = self.num_pheromones * ratio
+            if math.isnan(pheromones_to_alloc):
+                pheromones_to_alloc = 0
             self.pherms_to_add[this_one._index, next_one._index] = pheromones_to_alloc
         return self.tour, self.pherms_to_add

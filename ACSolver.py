@@ -35,7 +35,7 @@ class ACSolver(object):
                 pheromones_to_register.append(matrix)
                 solution = TSPSolution(tour)
                 cost = solution.cost
-                if bssf == None:
+                if bssf is None:
                     bssf = solution
                 elif bssf.cost > cost:
                     bssf = solution
