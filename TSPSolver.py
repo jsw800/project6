@@ -78,7 +78,43 @@ class TSPSolver:
     '''
 
     def greedy(self, time_allowance=60.0):
-        pass
+        results = {}
+        cities = self._scenario.getCities()
+        ncities = len(cities)
+        bssf = TSPSolution(cities)
+        bssf.cost = math.inf
+        start_time = time.time()
+        for city in cities:  # All the cities
+            current_city = city
+            path = []
+            path.append(city)
+            while len(path) < ncities:
+                bcsf = math.inf  # Best cost so far
+                best_city = None
+                has_child = False
+                for child_city in cities:
+                    if child_city not in path:  # See if this city has already been visited
+                        has_child = True
+                        cost = current_city.costTo(child_city)
+                        if cost <= bcsf:
+                            bcsf = cost
+                            best_city = child_city
+                if has_child is False:
+                    break
+                path.append(best_city)
+                current_city = best_city
+            sol = TSPSolution(path)
+            if bssf.cost > sol.cost:
+                bssf = TSPSolution(path)
+        end_time = time.time()
+        results['cost'] = bssf.cost
+        results['time'] = end_time - start_time
+        results['count'] = 1
+        results['soln'] = bssf
+        results['max'] = None
+        results['total'] = None
+        results['pruned'] = None
+        return results
 
     ''' <summary>
         This is the entry point for the branch-and-bound algorithm that you will implement
