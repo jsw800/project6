@@ -1,6 +1,15 @@
 from TSPClasses import *
 from AntColony import *
 
+EVAP_RATE = .1
+NUM_PER_GENERATION = 40
+GENERATION_BOUND = 50
+
+
+def evaporate(phMatrix):
+    phMatrix *= EVAP_RATE
+    return phMatrix
+
 
 class ACSolver(object):
 
@@ -12,39 +21,40 @@ class ACSolver(object):
         cityAmount = len(self.scenario.getCities())
         cities = self.scenario.getCities()
         # master pherm matrix
-        cityMatrix = np.ones((cityAmount, cityAmount), float, 'C')
+        pheromone_matrix = np.ones((cityAmount, cityAmount), dtype=float)
+        dist_matrix = np.zeros([cityAmount, cityAmount], dtype=float)
+        for i, city in enumerate(cities):
+            for j, city2 in enumerate(cities):
+                dist_matrix[i, j] = city.costTo(city2)
+
         for i in range(len(cities)):
-            cityMatrix[i, i] = 0
-        antNum = 10
-        antArray = []
+            pheromone_matrix[i, i] = 0
+        ants = []
         bssf = None
         start_time = time.time()
-        currrent_time = time.time()
-        generationBound = 10
+        current_time = time.time()
+        lastEdited = 0
         currentGeneration = 0
 
-        while currrent_time - start_time < self.time:
-            antArray = []
-            for i in range(antNum):
-                antArray.append(Ant(cities, cityMatrix))
-
+        while current_time - start_time < self.time and currentGeneration < lastEdited + GENERATION_BOUND:
+            ants = [Ant(cities, pheromone_matrix, dist_matrix) for _ in range(NUM_PER_GENERATION)]
             pheromones_to_register = []
-            for i in range(antNum):
-                tour, matrix = antArray[i].generate_tour()
+            for i in range(len(ants)):
+                tour, matrix = ants[i].generate_tour()
                 # Add matrix to each time
                 pheromones_to_register.append(matrix)
                 solution = TSPSolution(tour)
                 cost = solution.cost
-                if bssf is None:
+                if bssf is None or bssf.cost > cost:
                     bssf = solution
-                elif bssf.cost > cost:
-                    bssf = solution
+                    lastEdited = currentGeneration
 
             for phMatrix in pheromones_to_register:
-                cityMatrix += phMatrix
+                pheromone_matrix += phMatrix
             
             currentGeneration += 1
-            currrent_time = time.time()
+            pheromone_matrix = evaporate(pheromone_matrix)
+            current_time = time.time()
         print(currentGeneration)
         return bssf
 

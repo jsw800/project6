@@ -3,6 +3,10 @@ import copy
 import random
 from TSPClasses import *
 
+ALPHA = 1.5
+BETA = 2
+NUM_PHEROMONES = 50.0
+
 
 def choose_index(probs):
     total_prob = sum(probs)
@@ -15,16 +19,21 @@ def choose_index(probs):
 
 class Ant(object):
 
-    def __init__(self, cities, master_pheromone_matrix):
+    def __init__(self, cities, master_pheromone_matrix, distance_matrix):
         self.cities = copy.deepcopy(cities)
         self.master_pheromones = master_pheromone_matrix
+        self.dist = distance_matrix
         self.tour = [self.cities.pop(random.randint(0, len(self.cities) - 1))]
         self.pherms_to_add = np.zeros(master_pheromone_matrix.shape, dtype=float)
-        self.num_pheromones = 50.0
+        self.num_pheromones = NUM_PHEROMONES
 
     def generate_tour(self):
         while len(self.cities) > 0:
-            probs = [self.master_pheromones[self.tour[-1]._index, city._index] for city in self.cities]
+            pherm_factors = [(self.master_pheromones[self.tour[-1]._index, city._index] ** ALPHA) for city in self.cities]
+            dist_factors = [((1 / self.dist[self.tour[-1]._index, city._index]) ** BETA) for city in self.cities]
+            # the probabilities are determined in part by the distances - longer distances have lower probs, unless
+            # pheromones are high.
+            probs = [pherm_factors[i] * dist_factors[i] for i in range(len(pherm_factors))]
             idx_to_add = choose_index(probs)
             self.tour.append(self.cities.pop(idx_to_add))
         total_cost = sum([self.tour[i].costTo(self.tour[i + 1]) for i in range(len(self.tour) - 1)])
