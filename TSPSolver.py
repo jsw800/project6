@@ -15,6 +15,7 @@ from TSPClasses import *
 import heapq
 import itertools
 from branchBound import BBSolver
+from ACSolver import *
 
 
 class TSPSolver:
@@ -151,4 +152,16 @@ class TSPSolver:
     '''
 
     def fancy(self, time_allowance=60.0):
-        pass
+        start_time = time.time()
+        solver = ACSolver(self._scenario, time_allowance=time_allowance)
+        soln = solver.solve()
+        end_time = time.time()
+        results = {}
+        results['cost'] = soln.cost
+        results['time'] = end_time - start_time
+        results['count'] = 1
+        results['soln'] = soln
+        results['max'] = None
+        results['total'] = None
+        results['pruned'] = None
+        return results
