@@ -107,6 +107,9 @@ class TSPSolver:
             sol = TSPSolution(path)
             if bssf.cost > sol.cost:
                 bssf = TSPSolution(path)
+
+
+
         end_time = time.time()
         results['cost'] = bssf.cost
         results['time'] = end_time - start_time
@@ -153,7 +156,8 @@ class TSPSolver:
 
     def fancy(self, time_allowance=60.0):
         start_time = time.time()
-        solver = ACSolver(self._scenario, time_allowance=time_allowance)
+        greedy_soln = self.greedy()
+        solver = ACSolver(greedy_soln['soln'], self._scenario, time_allowance=time_allowance)
         soln = solver.solve()
         end_time = time.time()
         results = {}

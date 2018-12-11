@@ -2,8 +2,14 @@ from TSPClasses import *
 from AntColony import *
 
 EVAP_RATE = .1
+# EVAP_RATE = .1
+# NUM_PER_GENERATION = 40
 NUM_PER_GENERATION = 40
-GENERATION_BOUND = 80
+# GENERATION_BOUND = 80
+GENERATION_BOUND = 500
+
+NUM_PHEROMONES = 50
+
 
 
 def evaporate(phMatrix):
@@ -13,9 +19,10 @@ def evaporate(phMatrix):
 
 class ACSolver(object):
 
-    def __init__(self, scenario, time_allowance = 60):
+    def __init__(self, obssf, scenario, time_allowance = 60):
         self.scenario = scenario
         self.time = time_allowance
+        self.orig_bssf = obssf
 
     def solve(self):
         cityAmount = len(self.scenario.getCities())
@@ -32,14 +39,27 @@ class ACSolver(object):
         for i in range(len(cities)):
             pheromone_matrix[i, i] = 0
         ants = []
-        bssf = None
+        bssf = self.orig_bssf
+
+        # add pheromones for the greedy path
+        for i in range(len(bssf.route) - 1):
+            this_one = bssf.route[i]
+            next_one = bssf.route[i + 1]
+
+            pheromones_to_alloc = 20
+            # print("cost: ", cost, " alloc: ", pheromones_to_alloc)
+            if math.isnan(pheromones_to_alloc):
+                pheromones_to_alloc = 0
+            pheromone_matrix[this_one._index, next_one._index] = pheromones_to_alloc
+
+
         start_time = time.time()
         current_time = time.time()
         lastEdited = 0
         currentGeneration = 0
 
         while current_time - start_time < self.time and currentGeneration < lastEdited + GENERATION_BOUND:
-            ants = [Ant(cities, pheromone_matrix, dist_matrix) for _ in range(NUM_PER_GENERATION)]
+            ants = [Ant(cities, pheromone_matrix, dist_matrix, bssf) for _ in range(NUM_PER_GENERATION)]
             pheromones_to_register = []
             for i in range(len(ants)):
                 tour, matrix = ants[i].generate_tour()
@@ -48,9 +68,11 @@ class ACSolver(object):
                 solution = TSPSolution(tour)
                 cost = solution.cost
                 if bssf is None or bssf.cost > cost:
+                    if bssf is not None:
+                        print('updated bssf: last cost ', bssf.cost, " next cost ", cost)
                     bssf = solution
                     lastEdited = currentGeneration
-                    print('updated bssf')
+
 
             for phMatrix in pheromones_to_register:
                 pheromone_matrix += phMatrix
